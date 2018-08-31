@@ -164,8 +164,9 @@ def make_action(size_of_X,size_of_C,k_sat,try_step,n_epoch,is_Training=1):
     rewards=tf.placeholder(tf.float32,shape=[1],name='rewards')
     action,log = model(inputx, k_sat, is_Training)
     var_loss=tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=log,labels=one_hot))/10+1e-4
-
-    train_step = tf.train.RMSPropOptimizer(1e-5).minimize(rewards-var_loss)
+    update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+    with tf.control_dependencies(update_ops):
+    	train_step = tf.train.RMSPropOptimizer(1e-5).minimize(rewards-var_loss)
     global lr, global_step
     with tf.Session() as sess:
         saver = tf.train.Saver(max_to_keep=2)
